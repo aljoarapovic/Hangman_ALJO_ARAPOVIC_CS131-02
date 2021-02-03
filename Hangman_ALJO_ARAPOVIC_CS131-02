@@ -1,0 +1,156 @@
+import java.util.Scanner;
+
+class Dictionary{
+   String [] words;
+   int dlen;
+  
+   public Dictionary(){
+       words = readFile();
+   }
+  
+   String[] readFile(){
+       try{
+           String [] words = new String[200];
+            Scanner sc = new Scanner(new FileReader("words.txt"));
+           int i = 0;
+           while(sc.hasNext()){
+               words[i++] = sc.next().trim().toUpperCase();
+           }
+           dlen = i;
+           sc.close();
+           return words;
+       }
+       catch(Exception e){
+           e.printStackTrace();
+       }
+       return null;
+   }
+   String chooseWord(){
+       int indx = (int)((Math.random() * 1000) % dlen);
+       return words[indx];
+   }
+}
+
+public class Hangman{
+   Dictionary dict;
+   int wins, looses;
+  
+   public class Hangman{
+       dict = new Dictionary();      
+   }
+  
+   public void loadWL(){
+       try{
+           Scanner sc = new Scanner(new FileReader("winloss.txt"));
+           String [] wl = sc.next().trim().split(",");
+           wins = Integer.parseInt(wl[0]);
+           looses = Integer.parseInt(wl[1]);
+           sc.close();
+       }
+       catch(Exception e){
+           e.printStackTrace();
+       }
+   }
+  
+   public void writeWL(){
+       try{
+           BufferedWriter br = new BufferedWriter(new FileWriter("winloss.txt"));
+           br.write(wins + "," + looses);
+           br.close();
+       }
+       catch(Exception e){
+           e.printStackTrace();
+       }
+   }
+  
+   public void playGame(){
+           try{
+               BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+               while(true){
+                   System.out.print("Do you want to play ? (y / n): ");
+                   String ch = br.readLine();
+                   if(!ch.equals("y"))
+                       break;
+                  
+                   String word = dict.chooseWord();
+                   int wl = word.length();
+                   char [] guess = new char[wl];
+                   int i;
+                  
+                   int guesscount = 6;
+                   char c;
+                   boolean found;
+                  
+                   for(i = 0; i < wl; i++){
+                       guess[i] = '-';
+                   }
+
+                   while(guesscount > 0){
+                       System.out.println();
+                       for(i = 0; i < wl; i++)
+                           System.out.print(guess[i]);
+                       System.out.println();
+                      
+                       System.out.println("Remaining guesses: " + guesscount);
+                       System.out.print("Guess a character: ");
+                       ch = br.readLine().toUpperCase();
+                       if(ch.length() != 1){
+                           System.out.println("Please enter exactly one character");
+                       }
+                       else{
+                           c = ch.charAt(0);
+                           found = false;
+                           for(i = 0; i < wl; i++){
+                               if(word.charAt(i) == c && guess[i] == '-'){
+                                   guess[i] = c;
+                                   found = true;
+                               }
+                           }
+                          
+                           if(!found){
+                               guesscount--;
+                           }
+                       }
+                      
+                       found = false;
+                       for(i = 0; i < wl; i++){
+                           if(guess[i] == '-'){
+                               found = true;
+                               break;
+                           }
+                       }
+                       if(!found)
+                           break;
+                   }
+                  
+                   if(guesscount == 0){
+                       System.out.println("\n\nYou loose the game.");
+                       System.out.println("Correct word is: " + word);
+                       looses++;
+                   }
+                   else{
+                       System.out.println();
+                       for(i = 0; i < wl; i++)
+                           System.out.print(guess[i]);
+                       System.out.println("\nYou won the game.");
+                       wins++;
+                   }
+                   System.out.println();
+              
+               }
+              
+           }
+           catch(Exception e){
+               e.printStackTrace();
+           }
+       }
+}
+
+public class Application {
+   public static void main(String [] args){
+       Hangman hm = new Hangman;
+       hm.loadWL();
+       hm.playGame();
+       hm.writeWL();
+   }
+}
